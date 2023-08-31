@@ -5,7 +5,13 @@ const prisma = new PrismaClient();
 // get all complaints controller
 async function getComplaints(req, res) {
     try {
-        const complaints = await prisma.complaint.findMany();
+        const complaints = await prisma.complaint.findMany(
+            {
+                include: {
+                    files: true
+                }
+            }
+        );
         res.json(complaints);
     } catch (error) {
         console.error('Error fetching complaints:', error);
