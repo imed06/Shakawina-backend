@@ -9,6 +9,9 @@ authRouter.post('/signup', authController.registerUser);
 // login router
 authRouter.post('/login', authController.loginUser);
 
+// update router
+authRouter.put('/update', authController.updateUser);
+
 // logout router
 authRouter.get('/logout', authController.logoutUser);
 

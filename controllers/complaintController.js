@@ -16,23 +16,34 @@ async function getComplaints(req, res) {
 // create a new complaint
 async function createComplaint(req, res) {
     try {
-        const { title, content, userId, complaintType, subject } = req.body;
+        const { data } = req.body
+        const jsonData = JSON.parse(data);
+
+        const { filename, path } = req.file;
+
 
         // Check if the user exists
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+        const plaignant = await prisma.plaignant.findUnique({ where: { id: jsonData.userId } });
+        if (!plaignant) {
+            return res.status(401).json({ error: 'Plaignant not found' });
         }
-        
+
         const newComplaint = await prisma.complaint.create({
             data: {
-                title,
-                content,
-                userId,
-                complaintType,
-                subject,
+                content: jsonData.content,
+                type: jsonData.type,
+                objet: jsonData.objet,
+                plaignantId: jsonData.userId,
             },
         });
+
+        const uploadImage = await prisma.file.create({
+            data: {
+                path: filename,
+                complaintId: newComplaint.id
+            }
+        })
+
         res.status(201).json({ message: 'Complaint created successfully', complaint: newComplaint });
     } catch (error) {
         console.error('Error creating complaint:', error);
@@ -57,19 +68,64 @@ async function getComplaintById(req, res) {
     }
 }
 
+// get a user complaints
+async function getUserComplaints(req, res) {
+    try {
+        const userId = parseInt(req.params.id);
+        const plaignant = await prisma.plaignant.findUnique({
+            where: { id: userId },
+            include: {
+                complaints: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    include: {
+                        answer: true // Include the associated answer
+                    }
+                }
+            },
+        });
+        if (!plaignant) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+        res.json(plaignant.complaints);
+    } catch (error) {
+        console.error('Error fetching complaint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// get filtred complaintes
+async function getComplaintsFilter(req, res) {
+    const { type } = req.body;
+
+    try {
+        const complaints = await prisma.complaint.findMany({
+            where: {
+                type: type // Filter by the complaint type
+            }
+            // You can include other options like orderBy and select as needed
+        });
+
+        res.json(complaints);
+    } catch (error) {
+        console.error('Error fetching complaints:', error);
+        res.status(500).json({ error: 'An error occurred while fetching complaints' });
+    }
+}
+
 // update a complaint
 async function updateComplaint(req, res) {
     try {
         const complaintId = parseInt(req.params.id);
-        const { title, content, complaintType, subject } = req.body;
+        const { content, type, objet } = req.body;
 
         const updatedComplaint = await prisma.complaint.update({
             where: { id: complaintId },
             data: {
-                title,
                 content,
-                complaintType,
-                subject,
+                type,
+                objet,
             },
         });
 
@@ -94,4 +150,4 @@ async function deleteComplaint(req, res) {
     }
 }
 
-module.exports = { getComplaints, createComplaint, getComplaintById, updateComplaint, deleteComplaint };
+module.exports = { getComplaints, createComplaint, getComplaintById, updateComplaint, deleteComplaint, getUserComplaints, getComplaintsFilter };

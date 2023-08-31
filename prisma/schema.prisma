@@ -11,27 +11,73 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   nom          String
   prenom       String
-  email        String    @unique
+  email        String   @unique
   password     String
   adresse      String?
   dateOfBirth  String?
   placeOfBirth String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model Plaignant {
+  id         Int         @id @default(autoincrement())
+  nom        String
+  prenom     String
+  wilaya     String
+  commune    String
+  natureDoc  String
+  numDoc     String
+  dateDeliv  String
+  placeDeliv String
+  email      String      @unique
+  password   String
+  tel        String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime?   @updatedAt
   complaints Complaint[]
 }
 
-
 model Complaint {
-  id           Int       @id @default(autoincrement())
-  title        String
-  content      String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @updatedAt
-  userId       Int
-  user         User      @relation(fields: [userId], references: [id])
-  complaintType String?
-  subject      String?
+  id          Int       @id @default(autoincrement())
+  content     String
+  type        String?
+  objet       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  status      String    @default("En attente de traitement")
+  plaignantId Int
+  plaignant   Plaignant @relation(fields: [plaignantId], references: [id])
+  files       File[]
+  answerId    Int?
+  answer      Answer?   @relation(fields: [answerId], references: [id])
 }
+
+model File {
+  id          Int       @id @default(autoincrement())
+  path        String?   @db.LongText
+  complaintId Int
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  answers   Answer[]
+}
+
+model Answer {
+  id          Int       @id @default(autoincrement())
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  adminId     Int
+  admin       Admin     @relation(fields: [adminId], references: [id])
+  complaints  Complaint[] // One-to-many relationship with Complaints
+}
+
