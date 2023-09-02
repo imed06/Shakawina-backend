@@ -25,7 +25,11 @@ async function createComplaint(req, res) {
         const { data } = req.body
         const jsonData = JSON.parse(data);
 
-        const { filename, path } = req.file;
+        var filename
+
+        if(req.file){
+            filename = req.file.filename
+        }
 
 
         // Check if the user exists
@@ -43,13 +47,14 @@ async function createComplaint(req, res) {
             },
         });
 
-        const uploadImage = await prisma.file.create({
-            data: {
-                path: filename,
-                complaintId: newComplaint.id
-            }
-        })
-
+        if(filename) {
+            const uploadImage = await prisma.file.create({
+                data: {
+                    path: filename,
+                    complaintId: newComplaint.id
+                }
+            })
+        }
         res.status(201).json({ message: 'Complaint created successfully', complaint: newComplaint });
     } catch (error) {
         console.error('Error creating complaint:', error);
@@ -103,12 +108,16 @@ async function getUserComplaints(req, res) {
 
 // get filtred complaintes
 async function getComplaintsFilter(req, res) {
-    const { type } = req.body;
+    const type = req.params.type;
 
     try {
         const complaints = await prisma.complaint.findMany({
             where: {
-                type: type // Filter by the complaint type
+                type: type,
+                status: "En révision" // Filter by the complaint type
+            },
+            include: {
+                files: true
             }
             // You can include other options like orderBy and select as needed
         });
@@ -156,4 +165,22 @@ async function deleteComplaint(req, res) {
     }
 }
 
-module.exports = { getComplaints, createComplaint, getComplaintById, updateComplaint, deleteComplaint, getUserComplaints, getComplaintsFilter };
+// count complaints
+async function countComplaints (req, res) {
+    try {
+      const complaintCount = await prisma.complaint.count();
+      const complaintCountNonTraités = await prisma.complaint.count({
+        where: {
+            status: "En attente"
+        }
+      });
+      
+      // Send the count to the frontend as JSON
+      res.status(200).json({ count: complaintCount, countNonTraités: complaintCountNonTraités });
+    } catch (error) {
+      console.error('Error counting blogs:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+module.exports = { getComplaints, createComplaint, getComplaintById, updateComplaint, deleteComplaint, getUserComplaints, getComplaintsFilter, countComplaints };

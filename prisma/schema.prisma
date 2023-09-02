@@ -47,7 +47,7 @@ model Complaint {
   objet       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  status      String    @default("En attente de traitement")
+  status      String    @default("En révision")
   plaignantId Int
   plaignant   Plaignant @relation(fields: [plaignantId], references: [id])
   files       File[]

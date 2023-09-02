@@ -21,8 +21,11 @@ complaintRouter.get('/', complaintController.getComplaints);
 // create new complaint
 complaintRouter.post('/new',upload.single("file"), complaintController.createComplaint);
 
+// count complaints
+complaintRouter.get('/count', complaintController.countComplaints);
+
 // get filterd complaints
-complaintRouter.get('/filter', complaintController.getComplaintsFilter);
+complaintRouter.get('/filter/:type', complaintController.getComplaintsFilter);
 
 // get single complaint
 complaintRouter.get('/:id', complaintController.getComplaintById);

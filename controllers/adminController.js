@@ -53,26 +53,39 @@ async function loginAdmin(req, res) {
 // change password controller
 async function changePassword(req, res) {
   try {
-    const { email, password } = req.body;
+    const { username, ancienPW, nouveauPW } = req.body;
 
     // Find user by email
-    const user = await prisma.plaignant.findUnique({ where: { email } });
+    const admin = await prisma.admin.findUnique({ where: { username } });
 
-    if (!user) {
+    if (!admin) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Compare passwords
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(ancienPW, admin.password);
 
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // create token
-    const token = createToken(user.id);
+    // Generate a new random password
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(nouveauPW, salt);
 
-    res.status(200).json({ plaignant: user, token: token });
+    const updatedAdmin = await prisma.admin.update({
+      data: {
+        password: hashedPassword
+      },
+      where: {
+        username
+      }
+    });
+
+    // create token
+    const token = createToken(updatedAdmin.id);
+
+    res.status(200).json({ admin: updatedAdmin, token: token });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -98,7 +111,7 @@ async function answerComplaint(req, res) {
       where: { id: parseInt(id) },
       data: {
         answer: { connect: { id: createdAnswer.id } },
-        status: 'Answered', // Assuming you want to update the status
+        status: 'Traitée', // Assuming you want to update the status
       },
     });
 

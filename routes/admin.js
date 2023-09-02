@@ -8,7 +8,7 @@ const adminRouter = Router();
 adminRouter.post('/login', adminController.loginAdmin);
 
 // update password router
-adminRouter.post('/changePassword', adminController.changePassword);
+adminRouter.put('/changePassword', adminController.changePassword);
 
 // answer complaint router
 adminRouter.post('/answer/:id', adminController.answerComplaint);
