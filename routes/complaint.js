@@ -27,6 +27,9 @@ complaintRouter.get('/count', complaintController.countComplaints);
 // get filterd complaints
 complaintRouter.get('/filter/:type', complaintController.getComplaintsFilter);
 
+// get filterd complaints
+complaintRouter.get('/archive', complaintController.getComplaintsArchive);
+
 // get single complaint
 complaintRouter.get('/:id', complaintController.getComplaintById);
 

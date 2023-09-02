@@ -27,7 +27,7 @@ async function createComplaint(req, res) {
 
         var filename
 
-        if(req.file){
+        if (req.file) {
             filename = req.file.filename
         }
 
@@ -47,7 +47,7 @@ async function createComplaint(req, res) {
             },
         });
 
-        if(filename) {
+        if (filename) {
             const uploadImage = await prisma.file.create({
                 data: {
                     path: filename,
@@ -118,6 +118,33 @@ async function getComplaintsFilter(req, res) {
             },
             include: {
                 files: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+            // You can include other options like orderBy and select as needed
+        });
+
+        res.json(complaints);
+    } catch (error) {
+        console.error('Error fetching complaints:', error);
+        res.status(500).json({ error: 'An error occurred while fetching complaints' });
+    }
+}
+
+// get archive complaintes
+async function getComplaintsArchive(req, res) {
+    try {
+        const complaints = await prisma.complaint.findMany({
+            where: {
+                status: "Traitée" // Filter by the complaint type
+            },
+            include: {
+                files: true,
+                answer: true
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
             // You can include other options like orderBy and select as needed
         });
@@ -166,21 +193,31 @@ async function deleteComplaint(req, res) {
 }
 
 // count complaints
-async function countComplaints (req, res) {
+async function countComplaints(req, res) {
     try {
-      const complaintCount = await prisma.complaint.count();
-      const complaintCountNonTraités = await prisma.complaint.count({
-        where: {
-            status: "En attente"
-        }
-      });
-      
-      // Send the count to the frontend as JSON
-      res.status(200).json({ count: complaintCount, countNonTraités: complaintCountNonTraités });
-    } catch (error) {
-      console.error('Error counting blogs:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+        const complaintCount = await prisma.complaint.count();
+        const complaintCountNonTraités = await prisma.complaint.count({
+            where: {
+                status: "En révision"
+            }
+        });
 
-module.exports = { getComplaints, createComplaint, getComplaintById, updateComplaint, deleteComplaint, getUserComplaints, getComplaintsFilter, countComplaints };
+        // Send the count to the frontend as JSON
+        res.status(200).json({ count: complaintCount, countNonTraités: complaintCountNonTraités });
+    } catch (error) {
+        console.error('Error counting blogs:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+module.exports = {
+    getComplaints,
+    createComplaint,
+    getComplaintById,
+    updateComplaint,
+    deleteComplaint,
+    getUserComplaints,
+    getComplaintsFilter,
+    countComplaints,
+    getComplaintsArchive
+};
