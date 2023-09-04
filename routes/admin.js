@@ -13,5 +13,7 @@ adminRouter.put('/changePassword', adminController.changePassword);
 // answer complaint router
 adminRouter.post('/answer/:id', adminController.answerComplaint);
 
+// get users router
+adminRouter.get("/users", adminController.getUsers)
 
 module.exports = adminRouter;

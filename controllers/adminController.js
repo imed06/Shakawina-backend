@@ -122,4 +122,31 @@ async function answerComplaint(req, res) {
   }
 }
 
-module.exports = { loginAdmin, changePassword, answerComplaint }
+// get all users infos
+async function getUsers(req, res) {
+  try {
+    const users = await prisma.plaignant.findMany(
+      {
+        select: {
+          id: true,
+          nom: true,
+          prenom: true,
+          wilaya: true,
+          commune: true,
+          natureDoc: true,
+          numDoc: true,
+          dateDeliv: true,
+          placeDeliv: true,
+          email: true,
+          tel: true,
+        }
+      }
+    );
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching complaints:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+module.exports = { loginAdmin, changePassword, answerComplaint, getUsers }

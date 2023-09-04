@@ -91,7 +91,8 @@ async function getUserComplaints(req, res) {
                         createdAt: 'desc'
                     },
                     include: {
-                        answer: true // Include the associated answer
+                        answer: true,
+                        files: true
                     }
                 }
             },
@@ -117,7 +118,8 @@ async function getComplaintsFilter(req, res) {
                 status: "En révision" // Filter by the complaint type
             },
             include: {
-                files: true
+                files: true,
+                plaignant: true
             },
             orderBy: {
                 createdAt: 'desc'
@@ -141,7 +143,8 @@ async function getComplaintsArchive(req, res) {
             },
             include: {
                 files: true,
-                answer: true
+                answer: true,
+                plaignant: true
             },
             orderBy: {
                 createdAt: 'desc'
