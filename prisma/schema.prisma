@@ -42,9 +42,9 @@ model Plaignant {
 
 model Complaint {
   id          Int       @id @default(autoincrement())
-  content     String
-  type        String?
-  objet       String?
+  content     String?    @db.Text
+  type        String
+  objet       String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   status      String    @default("En révision")
@@ -73,7 +73,7 @@ model Admin {
 
 model Answer {
   id          Int       @id @default(autoincrement())
-  content     String
+  content     String    @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   adminId     Int
