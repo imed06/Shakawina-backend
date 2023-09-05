@@ -201,7 +201,8 @@ async function countComplaints(req, res) {
         const complaintCount = await prisma.complaint.count();
         const complaintCountNonTraités = await prisma.complaint.count({
             where: {
-                status: "En révision"
+                status: "En révision",
+                type: "réclamation"
             }
         });
 
