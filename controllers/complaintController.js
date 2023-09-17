@@ -206,8 +206,22 @@ async function countComplaints(req, res) {
             }
         });
 
+        const remarqueCountNonTraités = await prisma.complaint.count({
+            where: {
+                status: "En révision",
+                type: "remarque"
+            }
+        });
+
+        const suggestionCountNonTraités = await prisma.complaint.count({
+            where: {
+                status: "En révision",
+                type: "suggestion"
+            }
+        });
+
         // Send the count to the frontend as JSON
-        res.status(200).json({ count: complaintCount, countNonTraités: complaintCountNonTraités });
+        res.status(200).json({ count: complaintCount, countNonTraités: complaintCountNonTraités, remarqueCount: remarqueCountNonTraités, suggestionCount: suggestionCountNonTraités });
     } catch (error) {
         console.error('Error counting blogs:', error);
         res.status(500).json({ error: 'Internal server error' });
